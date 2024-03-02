@@ -10,6 +10,7 @@ const dateOptions: Intl.DateTimeFormatOptions = {
   day: 'numeric',
 }
 
+/* eslint-disable vue/no-irregular-whitespace, no-irregular-whitespace */
 const dialogText = `名前：とれいす（toreis）
 誕生日：${birthday.toLocaleDateString('ja-JP', dateOptions)}（${
   today.getFullYear()
@@ -24,6 +25,7 @@ const dialogText = `名前：とれいす（toreis）
 　　　Kisarazu College
 所属：情報工学科 4年
 `
+/* eslint-enable vue/no-irregular-whitespace, no-irregular-whitespace */
 
 export class AboutMeScene extends SceneBase {
   private menuControls!: EscMenuControls
