@@ -28,6 +28,7 @@ const dialogText = `名前：とれいす（toreis）
 export class AboutMeScene extends SceneBase {
   private menuControls!: EscMenuControls
   private aboutMeUiLayer!: Phaser.GameObjects.Container
+  private playerSprite?: Phaser.GameObjects.Sprite
 
   constructor() {
     super('aboutMeScene')
@@ -38,15 +39,109 @@ export class AboutMeScene extends SceneBase {
   }
 
   private updateCalledByScene(scene: Phaser.Scene) {
+    this.resize()
     this.menuControls.updateCalledByScene(scene)
+  }
+
+  private resize() {
+    const width = this.scene.systems.game.canvas.width
+    const height = this.scene.systems.game.canvas.height
+
+    this.aboutMeUiLayer.removeAll(true)
+    this.createBackground()
+    this.createRightDialog(dialogText)
+    this.playerSprite!.setPosition(width / 4, height / 2)
   }
 
   create(scene: Phaser.Scene) {
     this.sys.events.on(Phaser.Scenes.Events.WAKE, (_thisScene: Phaser.Scene, ...args: Phaser.Scene[]) => {
       this.updateCalledByScene(args[0])
     })
+
+    this.scene.systems.scale.on(Phaser.Scale.Events.RESIZE, () => {
+      this.resize()
+    })
     this.aboutMeUiLayer = this.add.container(0, 0)
     this.menuControls = new EscMenuControls(scene.input, this)
+
+    this.createBackground()
+    this.createRightDialog(dialogText)
+    this.createSprite()
+
+    const nameContainer = this.add.container(0, 0)
+    this.aboutMeUiLayer.add(nameContainer)
+
+    this.playerSprite!.anims.startAnimation('aboutMePlayerRotation')
+  }
+
+  createBackground() {
+    const width = this.scene.systems.game.canvas.width
+    const height = this.scene.systems.game.canvas.height
+
+    const backgroundObj = new Phaser.GameObjects.Rectangle(
+      this,
+      width / 2,
+      height / 2,
+      width,
+      height,
+    ).setFillStyle(0x545454, 0.5)
+
+    this.aboutMeUiLayer.add(backgroundObj)
+  }
+
+  createRightDialog(text?: string) {
+    const cameraX = this.cameras.main.scrollX
+    const cameraY = this.cameras.main.scrollY
+    const width = this.scene.systems.game.canvas.width
+    const height = this.scene.systems.game.canvas.height
+
+    const dialogObj = new Phaser.GameObjects.Rectangle(
+      this,
+      (width / 7) * 5 + cameraX,
+      height / 2 + cameraY,
+      (width / 7) * 3,
+      (height / 6) * 5,
+    )
+      .setStrokeStyle(3, 0x907748, 1)
+      .setFillStyle(0x454851, 0.9)
+
+    this.aboutMeUiLayer.add(dialogObj)
+
+    if (text)
+      this.createRightDialogText(text)
+  }
+
+  createRightDialogText(text: string) {
+    const cameraX = this.cameras.main.scrollX
+    const cameraY = this.cameras.main.scrollY
+    const width = this.scene.systems.game.canvas.width
+    const height = this.scene.systems.game.canvas.height
+
+    const textObj = new Phaser.GameObjects.Text(this, width / 2 + cameraX + 10,
+      height / 2
+    + cameraY
+        - (height / 12) * 5
+        + 10,
+      text,
+      {
+        fontFamily: 'DotGothic16',
+        fontSize: '1.5rem',
+        lineSpacing: 16,
+        wordWrap: { width: width / 7 * 3 - 25 },
+      })
+
+    this.aboutMeUiLayer.add(textObj)
+  }
+
+  createSprite() {
+    const width = this.scene.systems.game.canvas.width
+    const height = this.scene.systems.game.canvas.height
+
+    this.playerSprite = this.add.sprite(0, 0, 'player')
+    this.playerSprite.setDepth(10)
+    this.playerSprite.setScale(8)
+    this.playerSprite.setFrame(1)
+    this.playerSprite.setPosition(width / 4, height / 2)
 
     this.anims.create({
       key: 'aboutMePlayerRotation',
@@ -56,58 +151,5 @@ export class AboutMeScene extends SceneBase {
       }),
       repeat: -1,
     })
-
-    const width = this.scene.systems.game.canvas.width
-    const height = this.scene.systems.game.canvas.height
-
-    const playerSprite = this.add.sprite(0, 0, 'player')
-    playerSprite.setDepth(10)
-    playerSprite.setScale(8)
-    playerSprite.setFrame(1)
-    playerSprite.setPosition(width / 4, height / 2)
-
-    const background = new Phaser.GameObjects.Rectangle(
-      this,
-      width / 2,
-      height / 2,
-      width,
-      height,
-    )
-    background.setFillStyle(0x545454, 0.5)
-    this.aboutMeUiLayer.add(background)
-
-    const nameContainer = this.add.container(0, 0)
-    this.aboutMeUiLayer.add(nameContainer)
-
-    const dialog = new Phaser.GameObjects.Rectangle(
-      this,
-      (width / 7) * 5 + this.scene.scene.cameras.main.scrollX,
-      height / 2 + this.scene.scene.cameras.main.scrollY,
-      (width / 7) * 3,
-      (height / 6) * 5,
-    )
-      .setStrokeStyle(3, 0x907748, 1)
-      .setFillStyle(0x454851, 0.9)
-
-    const dialogTextObject = this.add.text(
-      width / 2 + this.scene.scene.cameras.main.scrollX + 10,
-      height / 2
-        + this.scene.scene.cameras.main.scrollY
-        - (height / 12) * 5
-        + 10,
-      dialogText,
-      {
-        fontFamily: 'DotGothic16',
-        fontSize: '1.5rem',
-        lineSpacing: 16,
-        wordWrap: { width: width / 7 * 3 - 25 },
-      },
-    )
-
-    this.aboutMeUiLayer.add(dialog)
-    this.aboutMeUiLayer.add(playerSprite)
-    this.aboutMeUiLayer.add(dialogTextObject)
-
-    playerSprite.anims.startAnimation('aboutMePlayerRotation')
   }
 }
